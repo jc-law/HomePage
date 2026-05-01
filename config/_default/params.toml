@@ -20,7 +20,7 @@ SortBy              = "default"
 [sidebar]
     emoji    = "🍥"
     subtitle = "Make something new in Mihoyo now"
-    avatar   = "img/avatar.jpg"
+    avatar   = "img/Avatar.jpg"
 
 [article]
     headingAnchor = false
