@@ -18,7 +18,7 @@ SortBy              = "default"
     lastUpdated = ":date_full"
 
 [sidebar]
-    emoji    = "🍥"
+    #emoji    = "🍥"
     subtitle = "Make something new in Mihoyo now"
     avatar   = "img/Avatar.png"
 
