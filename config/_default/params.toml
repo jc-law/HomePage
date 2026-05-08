@@ -50,21 +50,21 @@ SortBy              = "default"
 
 ## Comments
 [comments]
-    enabled: true
-    provider: giscus
+    enabled = true
+    provider = "giscus"
 
-    giscus:
-        repo: jc-law/HomePage
-        repoId: R_kgDOSRlAvQ
-        category: Announcements
-        categoryId: DIC_kwDOSRlAvc4C8mdP
-        mapping: pathname
-        strict: 0
-        reactionsEnabled: 1
-        emitMetadata: 0
-        inputPosition: bottom
-        lightTheme: light
-        darkTheme: dark
+[comments.giscus]
+    repo = "jc-law/HomePage"
+    repoId = "R_kgDOSRlAvQ"
+    category = "Announcements"
+    categoryId = "DIC_kwDOSRlAvc4C8mdP"
+    mapping = "pathname"
+    strict = 0
+    reactionsEnabled = 1
+    emitMetadata = 0
+    inputPosition = "bottom"
+    lightTheme = "light"
+    darkTheme = "dark"
 
     # See all the available configurations at https://github.com/CaiJimmy/hugo-theme-stack/blob/master/config/_default/params.toml
     # Copy the configurations you need from there and paste it here.
