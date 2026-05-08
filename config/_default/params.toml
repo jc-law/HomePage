@@ -50,7 +50,6 @@ SortBy              = "default"
 
 ## Comments
 [comments]
-comments:
     enabled: true
     provider: giscus
 
