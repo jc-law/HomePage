@@ -1,0 +1,16 @@
+<!-- 1. 继承远程主题原本的左侧边栏所有逻辑 -->
+{{ include "partials/sidebar/left.html" . }}
+
+<!-- 2. 利用行内最高权重，强行把线上的圆形遮罩和切边彻底粉碎 -->
+<style>
+    /* 强行把包裹头像的圆形容器撑回正方形，并加上微圆角 */
+    .avatar-container {
+        border-radius: 12px !important; 
+        overflow: hidden !important;
+    }
+    /* 强行让里面的图片以 contain 模式完整显示，绝对不切除四个角 */
+    .avatar-container .site-avatar {
+        border-radius: 12px !important;
+        object-fit: contain !important; 
+    }
+</style>
