@@ -3,13 +3,11 @@
 */
 /* 恢复侧边栏头像为正方形（带一点点高级的微圆角） */
 /* 终极降维打击：全站只要叫 avatar 的元素或图片，一律强行变为微圆角正方形 */
-[class*="avatar"],
 .sidebar .avatar,
-.avatar {
-    border-radius: 12px !important;    /* 想要纯正方形改成 0 */
-    clip-path: none !important;        /* 废除可能存在的 svg 遮罩裁切 */
+.avatar,
+[class*="avatar"] {
+    border-radius: 12px !important;
+    clip-path: none !important;
     -webkit-clip-path: none !important;
-    mask-image: none !important;       /* 废除可能存在的 CSS 蒙版 */
-    -webkit-mask-image: none !important;
     object-fit: cover !important;
 }
