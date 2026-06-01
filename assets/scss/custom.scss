@@ -1,13 +1,18 @@
-/*
-    You can add your own custom styles here.
-*/
-/* 恢复侧边栏头像为正方形（带一点点高级的微圆角） */
-/* 终极降维打击：全站只要叫 avatar 的元素或图片，一律强行变为微圆角正方形 */
-.sidebar .avatar,
-.avatar,
-[class*="avatar"] {
-    border-radius: 12px !important;
+/* ===================================================
+   针对 lawyiktsun.asia 侧边栏头像的精准重置样式
+   =================================================== */
+
+/* 1. 把包裹头像的容器从圆形恢复为正方形，并去掉可能存在的任何剪裁 */
+header .avatar,
+.sidebar header .avatar {
+    border-radius: 12px !important;       /* 想要纯正方形请改成 0 */
     clip-path: none !important;
     -webkit-clip-path: none !important;
-    object-fit: cover !important;
+}
+
+/* 2. 确保里面的图片填满正方形容器，同时保持原图比例不拉伸 */
+header .avatar img,
+.sidebar header .avatar img {
+    border-radius: 12px !important;       /* 这里的圆角需要和上面保持一致 */
+    object-fit: contain !important;       /* contain 会保证你的方形头像100%完整显示，绝不切边 */
 }
