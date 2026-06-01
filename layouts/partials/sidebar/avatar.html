@@ -1,13 +1,12 @@
 <a href="{{ .Site.BaseURL }}">
     {{ if .Site.Params.sidebar.avatar }}
         {{ $avatar := resources.Get .Site.Params.sidebar.avatar }}
-        {{ if $avatar }}
-            {{ set . "avatar" $avatar }}
-        {{ else }}
-            {{ set . "avatar" (resources.GetRemote .Site.Params.sidebar.avatar) }}
+        
+        {{ if not $avatar }}
+            {{ $avatar = resources.GetRemote .Site.Params.sidebar.avatar }}
         {{ end }}
         
-        {{ with .avatar }}
+        {{ with $avatar }}
             <img src="{{ .RelPermalink }}" 
                  width="300" 
                  height="300" 
