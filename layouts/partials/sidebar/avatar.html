@@ -10,22 +10,22 @@
             <img src="{{ .RelPermalink }}" 
                  width="300" 
                  height="300" 
-                 style="border-radius: 12px !important; object-fit: contain !important;" 
+                 style="border-radius: 12px !important; object-fit: cover !important;" 
                  alt="Avatar" 
                  loading="lazy">
         {{ end }}
     {{ end }}
 </a>
 
+<!-- ⚡ 终极降维打击：用最长的套娃路径，强行震碎它的高权重 ⚡ -->
 <style>
-    .avatar-container,
-    [class*="avatar-container"],
-    .sidebar .avatar-container {
+    html body .main-container .left-sidebar .header .avatar-container,
+    .main-container .left-sidebar .header .avatar-container,
+    .avatar-container {
         border-radius: 12px !important;
         clip-path: none !important;
         -webkit-clip-path: none !important;
         mask-image: none !important;
         -webkit-mask-image: none !important;
-        overflow: hidden !important;
     }
 </style>
