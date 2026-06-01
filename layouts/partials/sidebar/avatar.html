@@ -10,22 +10,35 @@
             <img src="{{ .RelPermalink }}" 
                  width="300" 
                  height="300" 
-                 style="border-radius: 12px !important; object-fit: cover !important;" 
                  alt="Avatar" 
                  loading="lazy">
         {{ end }}
     {{ end }}
 </a>
 
-<!-- ⚡ 终极降维打击：用最长的套娃路径，强行震碎它的高权重 ⚡ -->
 <style>
-    html body .main-container .left-sidebar .header .avatar-container,
-    .main-container .left-sidebar .header .avatar-container,
-    .avatar-container {
+    /* 无论外壳、内衬、链接、图片还是主题自带的任何隐藏特效层，全部强行统一成 12px 圆角 */
+    [class*="avatar"],
+    [class*="avatar"] *,
+    .avatar-container,
+    .avatar-container *,
+    .site-avatar,
+    .site-avatar *,
+    .site-logo,
+    .site-logo * {
         border-radius: 12px !important;
         clip-path: none !important;
         -webkit-clip-path: none !important;
         mask-image: none !important;
         -webkit-mask-image: none !important;
+        mask: none !important;
+        -webkit-mask: none !important;
+    }
+
+    /* 确保图片本身完美拉伸填充，不留白边 */
+    [class*="avatar"] img,
+    .avatar-container img,
+    .site-logo img {
+        object-fit: cover !important;
     }
 </style>
