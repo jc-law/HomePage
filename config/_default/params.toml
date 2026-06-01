@@ -48,6 +48,14 @@ SortBy              = "default"
     toggle  = true
     default = "auto"
 
+# 1. 强制 Hugo 在处理头像时不进行中央硬裁切 (fill)，而是完整缩放 (fit)
+[imaging.avatar]
+    action = "fit"
+
+# 2. 告诉 Stack 主题，不要帮我加任何自定义 CSS 文件的壳，完全走正统通道
+[assets]
+    customSCSS = "scss/custom.scss"
+
 ## Comments
 [comments]
     enabled = true
