@@ -1,7 +1,5 @@
-<!-- 1. 继承远程主题原本的左侧边栏所有逻辑 -->
-{{ include "partials/sidebar/left.html" . }}
+{{ partial "sidebar/left.html" . }}
 
-<!-- 2. 利用行内最高权重，强行把线上的圆形遮罩和切边彻底粉碎 -->
 <style>
     /* 强行把包裹头像的圆形容器撑回正方形，并加上微圆角 */
     .avatar-container {
