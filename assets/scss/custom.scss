@@ -2,17 +2,9 @@
    针对 lawyiktsun.asia 侧边栏头像的精准重置样式
    =================================================== */
 
-/* 1. 把包裹头像的容器从圆形恢复为正方形，并去掉可能存在的任何剪裁 */
-header .avatar,
-.sidebar header .avatar {
-    border-radius: 12px !important;       /* 想要纯正方形请改成 0 */
-    clip-path: none !important;
-    -webkit-clip-path: none !important;
-}
-
-/* 2. 确保里面的图片填满正方形容器，同时保持原图比例不拉伸 */
-header .avatar img,
-.sidebar header .avatar img {
-    border-radius: 12px !important;       /* 这里的圆角需要和上面保持一致 */
-    object-fit: contain !important;       /* contain 会保证你的方形头像100%完整显示，绝不切边 */
+/* 🎯 精准狙击：覆写 DevTools 里抓到的内鬼样式 */
+.sidebar header .site-avatar .site-logo,
+.sidebar header .site-avatar .site-logo img,
+.sidebar header .site-avatar {
+    border-radius: 12px !important; /* 12px 是带一点微圆角，如果想要纯正方形改成 0 */
 }
