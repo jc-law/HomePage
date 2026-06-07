@@ -4,7 +4,7 @@ links:
   - title: LinkedIn
     description: 建立连结
     website: https://www.linkedin.com/in/lawyiktsun
-    image: https://static.licdn.com/aero-v1/sc/h/aahlc8ivbnmk0t3eyz8as5gvr
+    image: LinkedIn_icon.svg.png
 menu:
     main: 
         weight: 4
