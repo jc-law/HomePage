@@ -2,7 +2,7 @@
 title: AI时代的独立游戏创作者指南：工具、市场与突围策略（2024-2026）
 description: 一人成军,奈何群雄割据
 slug: IndieWithAI
-date: 2026-06-7 00:00:00+0000
+date: 2026-06-07 00:00:00+0000
 image: Cover0607.png
 categories:
     - 行业洞察
