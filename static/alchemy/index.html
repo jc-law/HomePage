@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prompt Alchemy: 元素觉醒 (火山引擎版)</title>
+    <title>Prompt Alchemy: 元素觉醒 (AI原生游戏)</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -34,7 +34,7 @@
             margin-bottom: 20px;
             border: 1px solid var(--border-color);
         }
-        input, button, textarea, select {
+        input, select, button, textarea {
             background: #252525;
             border: 1px solid #444;
             color: #fff;
@@ -45,7 +45,7 @@
             box-sizing: border-box;
             font-size: 14px;
         }
-        input:focus, textarea:focus {
+        input:focus, select:focus, textarea:focus {
             border-color: var(--accent-color);
             outline: none;
         }
@@ -122,25 +122,41 @@
         .el-col {
             flex: 1;
         }
+        .sync-btn {
+            background: #333;
+            color: #aaa;
+            font-size: 12px;
+            padding: 5px 10px;
+            margin: 0;
+            width: auto;
+            display: inline-block;
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>🧪 Prompt Alchemy: 元素觉醒 (火山方舟版)</h2>
-    <p style="font-size: 0.95em; color: #aaa; margin-top: -10px;">基于字节跳动火山引擎大模型运行的 AI 原生游戏。</p>
+    <h2>🧪 Prompt Alchemy: 元素觉醒</h2>
+    <p style="font-size: 0.95em; color: #aaa; margin-top: -10px;">一款运行时完全由 AI Token 驱动属性与画面生成的原生游戏 (AI-Native Game)。</p>
 
     <div class="setup-panel" id="setupPanel">
-        <h3>🔑 配置您的火山引擎 API</h3>
+        <h3>🔑 配置您的 OpenRouter API</h3>
+        <label for="apiKey">API Key:</label>
+        <input type="password" id="apiKey" placeholder="输入您的 OpenRouter 密钥 (sk-or-v1-...)" value="">
         
-        <label for="apiKey">Volcengine API Key:</label>
-        <input type="password" id="apiKey" placeholder="请输入在火山方舟生成的 API Key" value="">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+            <label for="modelId" style="margin: 0;">选择推理模型：</label>
+            <button class="sync-btn" onclick="syncModels()">🔄 联网同步最新列表</button>
+        </div>
+        <select id="modelId">
+            <option value="google/gemini-2.5-flash">Google: Gemini 2.5 Flash (推荐：极速且最省Token)</option>
+            <option value="deepseek/deepseek-chat">DeepSeek: DeepSeek V3</option>
+            <option value="meta-llama/llama-3.3-70b-instruct">Meta: Llama 3.3 70B</option>
+            <option value="anthropic/claude-3.5-haiku">Anthropic: Claude 3.5 Haiku</option>
+            <option value="openai/gpt-4o-mini">OpenAI: GPT-4o Mini</option>
+        </select>
         
-        <label for="endpointId">接入点 ID (Endpoint ID):</label>
-        <input type="text" id="endpointId" placeholder="例如: ep-2026xxxxxxxx-xxxxx (必须填写，否则无法调用)" value="">
-        <p style="font-size: 0.8em; color: #888; margin-top: -4px;">* 注：火山引擎必须通过在线部署的接入点 ID 来调用具体模型（如 Doubao-pro 等）。</p>
-        
-        <button onclick="startGame()">确认并进入游戏</button>
+        <button onclick="startGame()">进入游戏</button>
     </div>
 
     <div class="game-panel" id="gamePanel" style="display:none;">
@@ -203,11 +219,49 @@
     let playerMonster = null;
     const enemyMonster = { name: "末日赛博巨兽", hp: 120, atk: 24 };
 
+    // 独立出来的异步模型同步函数，点按钮才会触发，绝对不阻塞初始化
+    async function syncModels() {
+        const modelSelect = document.getElementById('modelId');
+        const syncBtn = document.querySelector('.sync-btn');
+        syncBtn.innerText = "⏳ 同步中...";
+        syncBtn.disabled = true;
+
+        try {
+            const response = await fetch("https://openrouter.ai/api/v1/models");
+            if (!response.ok) throw new Error("CORS 或网络阻断");
+            const json = await response.json();
+            
+            modelSelect.innerHTML = ""; 
+            const recommendedBrands = ['google', 'meta-llama', 'anthropic', 'openai', 'deepseek'];
+            
+            json.data.forEach(model => {
+                const brand = model.id.split('/')[0];
+                if (recommendedBrands.includes(brand)) {
+                    const opt = document.createElement('option');
+                    opt.value = model.id;
+                    const ctx = model.context_length ? `[${Math.round(model.context_length/1024)}K]` : '';
+                    opt.innerText = `${model.name} ${ctx} (${model.id})`;
+                    modelSelect.appendChild(opt);
+                }
+            });
+            modelSelect.value = "google/gemini-2.5-flash";
+            syncBtn.innerText = "✅ 同步成功";
+        } catch (error) {
+            console.error(error);
+            syncBtn.innerText = "❌ 同500或跨域失败";
+            alert("由于浏览器跨域策略(CORS)或网络限制，无法实时抓取。已自动保留本地预设模型列表，不影响游戏游玩！");
+        } finally {
+            setTimeout(() => {
+                syncBtn.innerText = "🔄 联网同步最新列表";
+                syncBtn.disabled = false;
+            }, 2000);
+        }
+    }
+
     function startGame() {
         const key = document.getElementById('apiKey').value;
-        const endpoint = document.getElementById('endpointId').value;
-        if(!key || !endpoint) {
-            alert('火山方舟模式下，API Key 和 接入点 ID (Endpoint ID) 均不能为空！');
+        if(!key) {
+            alert('BYOK 模式需要您输入有效的 OpenRouter API Key！');
             return;
         }
         document.getElementById('setupPanel').style.display = 'none';
@@ -216,7 +270,7 @@
 
     async function summonMonster() {
         const apiKey = document.getElementById('apiKey').value;
-        const endpointId = document.getElementById('endpointId').value;
+        const model = document.getElementById('modelId').value;
         const elemA = document.getElementById('elemA').value;
         const elemB = document.getElementById('elemB').value;
         const playerPrompt = document.getElementById('playerPrompt').value;
@@ -229,47 +283,48 @@
         document.getElementById('summonBtn').disabled = true;
         document.getElementById('battleBtn').style.display = 'none';
         document.getElementById('playerCard').classList.remove('active');
-        document.getElementById('gameStatus').innerText = "🔮 正在连接火山方舟，大模型正通过接入点实时推理属性、渲染图案...";
+        document.getElementById('gameStatus').innerText = "🔮 正在向 OpenRouter 发送 Token，AI 引擎正在实时推理属性、渲染像素图案...";
 
         const systemPrompt = `你是一款游戏后端的实时规则与视觉渲染引擎。
 请根据玩家提供的两个基础元素和融合提示词，创造一个对战怪物。
-必须严格返回以下标准 JSON 格式，不要包含任何 markdown 标记（绝对不要用 \`\`\`json 块包裹），直接输出大括号包裹的纯文本 JSON：
+必须严格返回以下标准 JSON 格式，不要包含任何 markdown 标记（不要用 \`\`\`json），直接输出大括号包裹的纯文本 JSON：
 {
   "name": "怪物名字(10字以内)",
   "hp": 随机70-150之间的整数,
   "atk": 随机15-35之间的整数,
   "skill": "技能名字和简短说明",
-  "ascii_art": "用普通符号画一幅符合该怪物形象的简易ASCII艺术画(高度4-5行，宽度20字符以内，内部绝对不能使用任何反引号，直接用换行符\\n分隔)"
+  "ascii_art": "用字符画一幅符合该怪物形象的简易ASCII艺术画(高度4-5行，宽度控制在20个字符以内，内部严禁使用任何反引号，直接用换行符\\n分隔)"
 }`;
 
         const userContent = `基础元素A: ${elemA}, 基础元素B: ${elemB}. 玩家融合创意: ${playerPrompt}`;
 
         try {
-            // 请求地址更换为火山方舟 V3 端点
-            const response = await fetch("https://ark.cn-beijing.volces.com/api/v3/chat/completions", {
+            const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
                 method: "POST",
                 headers: {
                     "Authorization": `Bearer ${apiKey}`,
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
+                    "HTTP-Referer": "https://ai-native-game.local", 
+                    "X-Title": "Prompt Alchemy"
                 },
                 body: JSON.stringify({
-                    "model": endpointId, // 火山引擎规范：这里传入的必须是接入点ID
+                    "model": model,
                     "messages": [
                         {"role": "system", "content": systemPrompt},
                         {"role": "user", "content": userContent}
-                    ]
+                    ],
+                    "response_format": { "type": "json_object" }
                 })
             });
 
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(errorData.error?.message || "方舟接口调用失败");
+                throw new Error(errorData.error?.message || "接口调用失败");
             }
 
             const data = await response.json();
             let rawContent = data.choices[0].message.content.trim();
             
-            // 兜底清洗：剔除不听话模型可能会带上的 Markdown 标记
             if (rawContent.startsWith("```")) {
                 rawContent = rawContent.replace(/^```json?/, "").replace(/```$/, "").trim();
             }
@@ -283,11 +338,11 @@
             document.getElementById('pSkill').innerText = `技能: ${result.skill}`;
             
             document.getElementById('playerCard').classList.add('active');
-            document.getElementById('gameStatus').innerText = `✨ 召唤成功！方舟大阵中走出了【${result.name}】！`;
+            document.getElementById('gameStatus').innerText = `✨ 召唤成功！远古大阵中走出了【${result.name}】！`;
             document.getElementById('battleBtn').style.display = 'block';
         } catch (error) {
             console.error(error);
-            document.getElementById('gameStatus').innerText = `❌ 召唤失败。原因: ${error.message}。请检查 Key 和 接入点 ID 是否匹配，或检查跨域控制。`;
+            document.getElementById('gameStatus').innerText = `❌ 召唤失败。原因: ${error.message}。建议检查 API Key 或更换模型重试。`;
         } finally {
             document.getElementById('summonBtn').disabled = false;
         }
@@ -315,17 +370,17 @@
         if(eHp <= 0) {
             log += `🏆 奇迹！你用 Prompt 编织出的 AI 生物成功击碎了赛博巨兽！`;
         } else if(pHp <= 0) {
-            log += `💀 战败！再接再厉，调整下提示词重新炼金吧！`;
+            log += `💀 战败！Boss 的防线坚不可摧。调整下你的提示词再来一次吧！`;
         } else {
             if(pHp > eHp) {
                 log += `⚖️ 由于你的生物血量残余较多 (${pHp} vs ${eHp})，评委判定你获得小胜！`;
             } else {
-                log += `⚖️ 回合结束，Boss 略微领先，你惜败！`;
+                log += `⚖️ 回合结束，Boss 以微弱的血量优势守住了擂台，你惜败！`;
             }
         }
 
         alert(log);
-        document.getElementById('gameStatus').innerText = "战斗已完结。可以开启下一轮 Token 炼金！";
+        document.getElementById('gameStatus').innerText = "战斗已完结。你可以修改融合配方与提示词，开启下一轮 Token 炼金！";
     }
 </script>
 
