@@ -223,26 +223,26 @@
         }
     }
 
-    // ✨ 核心逻辑：严密控行控高，杜绝产生滚动条
+    // ✨ 核心逻辑：严密控行控高，杜绝产生滚动条    
+    // 🎨 流式实时渲染字符艺术矩阵
     async function generateAsciiArt() {
         const key = document.getElementById('keyInput').value;
         const model = document.getElementById('modelInput').value;
         const prompt = document.getElementById('promptInput').value;
 
         if(!key) { alert("请先填写 OpenRouter API Key！"); return; }
-        if(!prompt) { alert("请输入画面描述！"); return; }
+        if(!prompt) { alert("你想画什么？请输入画面描述！"); return; }
 
         document.getElementById('generateBtn').disabled = true;
         canvasDiv.style.color = "#00ff55";
-        canvasDiv.innerText = ""; 
-        log(`流式渲染通道开启中...`, "#ffcc00");
+        canvasDiv.innerText = ""; // 清空画布，准备实时作画
+        log(`正在请求 [${model}] 开启流式矩阵渲染通道...`, "#ffcc00");
 
-        // 💥 核心改动 3：严厉的物理参数硬约束。用最精确的规训词把大模型死死按在首屏之内
-        const systemPrompt = `你是一个顶级字符画（ASCII Art）艺术编译器。请根据用户的描述，生成一张纯字符矩阵图形。
-【画幅物理硬约束条件（极其重要，违反将导致系统死锁）】：
-1. 你的整个图形输出必须在 高度：15行 到 20行 之间，每行的宽度：严格控制在 50 到 70 个字符以内。
-2. 绝对不能超过 20 行！在绘制完主图案后请立刻闭合输出，宁可留白也绝对不允许产生第 21 行。
-3. 只能吐出纯字符画矩阵本身。严禁带有任何 Markdown 标记（如 \`\`\` 符号）、普通文字说明、多余的空行或打招呼。一文字错漏都将导致编译失败。`;
+        const systemPrompt = `你是一个顶级字符画（ASCII Art）艺术家。请根据用户的描述，生成一张由纯字符、特殊符号或颜文字组成的字符画矩阵。
+规范要求：
+1. 必须是一幅完整的图形矩阵，宽度控制在 40-80 个字符之间，高度控制在 15-30 行之间。
+2. 只能输出字符画文本本身。绝对不能包含任何普通的解释文字、问候语，也绝对不能用 \`\`\` 符号或 \`\`\`text 等 markdown 标记包裹。
+3. 请发挥你的空间想象力，用密度不同的符号组合出明暗与线条，使其看起来惟妙惟肖。`;
 
         try {
             const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
@@ -253,7 +253,7 @@
                 },
                 body: JSON.stringify({
                     "model": model,
-                    "stream": true, 
+                    "stream": true, // ⚡️ 开启流式传输，拒绝死等阻塞！
                     "messages": [
                         {"role": "system", "content": systemPrompt},
                         {"role": "user", "content": prompt}
@@ -266,6 +266,7 @@
                 throw new Error(errData.error?.message || `HTTP 错误: ${response.status}`);
             }
 
+            // 🌊 处理流式文本读取
             const reader = response.body.getReader();
             const decoder = new TextDecoder("utf-8");
             let buffer = "";
@@ -274,10 +275,13 @@
                 const { done, value } = await reader.read();
                 if (done) break;
 
+                // 解码流式切片数据
                 const chunk = decoder.decode(value, { stream: true });
                 buffer += chunk;
 
+                // OpenRouter 的流式返回是以 data: 开头的多行文本
                 const lines = buffer.split("\n");
+                // 留出最后一行不完整的 buffer
                 buffer = lines.pop(); 
 
                 for (const line of lines) {
@@ -289,23 +293,26 @@
                             const parsed = JSON.parse(cleanedLine.replace(/^data: /, ""));
                             const deltaText = parsed.choices?.[0]?.delta?.content || "";
                             
+                            // 💥 重点：每收到一个符号，立刻无缝追加到黑画布里！
                             if (deltaText) {
-                                // 拒绝反引号，确保纯粹性
+                                // 过滤掉可能意外蹦出来的 markdown 反引号包裹
                                 if (!deltaText.includes("```")) {
                                     canvasDiv.innerText += deltaText;
                                 }
                             }
-                        } catch (jsonErr) {}
+                        } catch (jsonErr) {
+                            // 忽略流式解析中的碎片微错
+                        }
                     }
                 }
             }
 
-            log(`首屏物理投射完毕。`, "#00ffaa");
+            log(`画布流式渲染收尾成功！渲染引擎：${model}`, "#00ffaa");
 
         } catch (e) {
             canvasDiv.style.color = "#ff3366";
             canvasDiv.innerText = `\n画布坍塌。原因: ${e.message}`;
-            log(`生成终止: ${e.message}`, "#ff3366");
+            log(`生成终止。错误核心: ${e.message}`, "#ff3366");
         } finally {
             document.getElementById('generateBtn').disabled = false;
         }
