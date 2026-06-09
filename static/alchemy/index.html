@@ -270,22 +270,22 @@
                 throw new Error(errData.error?.message || `HTTP 错误: ${response.status}`);
             }
 
-            // 🌊 处理流式文本读取
+// 🌊 升级版：高吞吐量流式文本流清洗器
             const reader = response.body.getReader();
             const decoder = new TextDecoder("utf-8");
-            let buffer = "";
+            let buffer = ""; // 核心：用于暂存残缺不全的碎包
 
             while (true) {
                 const { done, value } = await reader.read();
                 if (done) break;
 
-                // 解码流式切片数据
-                const chunk = decoder.decode(value, { stream: true });
-                buffer += chunk;
+                // 1. 持续无缝拼接新老数据
+                buffer += decoder.decode(value, { stream: true });
 
-                // OpenRouter 的流式返回是以 data: 开头的多行文本
-                const lines = buffer.split("\n");
-                // 留出最后一行不完整的 buffer
+                // 2. 只有遇到真正的换行符，才认为这一阶段传输结束
+                let lines = buffer.split("\n");
+                
+                // 3. 💥 关键点：把最后一行可能不完整的“断头包”留给下一个切片去拼接
                 buffer = lines.pop(); 
 
                 for (const line of lines) {
@@ -293,19 +293,20 @@
                     if (!cleanedLine || cleanedLine === "data: [DONE]") continue;
 
                     if (cleanedLine.startsWith("data: ")) {
+                        const jsonStr = cleanedLine.replace(/^data: /, "");
                         try {
-                            const parsed = JSON.parse(cleanedLine.replace(/^data: /, ""));
+                            const parsed = JSON.parse(jsonStr);
                             const deltaText = parsed.choices?.[0]?.delta?.content || "";
                             
-                            // 💥 重点：每收到一个符号，立刻无缝追加到黑画布里！
                             if (deltaText) {
-                                // 过滤掉可能意外蹦出来的 markdown 反引号包裹
+                                // 拒绝反引号，确保纯粹性
                                 if (!deltaText.includes("```")) {
                                     canvasDiv.innerText += deltaText;
                                 }
                             }
                         } catch (jsonErr) {
-                            // 忽略流式解析中的碎片微错
+                            // 💡 调试利器：如果真的碎包了，我们能在控制台看到它到底碎成了什么样
+                            console.warn("流式断句错位，正在等待下一个切片拼接...", jsonStr);
                         }
                     }
                 }
