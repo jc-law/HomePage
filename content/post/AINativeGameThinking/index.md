@@ -2,7 +2,7 @@
 title: AI原生游戏的小小思考
 description: 本文AI查重率为：0%
 slug: ThinkAboutAINativeGame
-date: 2026-06-12 00:00:00+0000
+date: 2026-06-11 00:00:00+0000
 image: Cover0612.png
 categories:
     - 行业洞察
